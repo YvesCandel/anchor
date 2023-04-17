@@ -3095,6 +3095,17 @@ fn localnet(
 
         use std::io::{self, BufRead};
 
+        io::stdin()
+            .lock()
+            .lines()
+            .next()
+            .map_or_else(
+                || Err(io::Error::new(io::ErrorKind::Other, "No input found")),
+                |result| result.map_err(|e| io::Error::new(io::ErrorKind::Other, e)),
+            )
+            .unwrap_or_else(|e| panic!("Error reading input: {:?}", e));
+
+
         // Check all errors and shut down.
         if let Err(err) = validator_handle.kill() {
             println!(
