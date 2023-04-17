@@ -3093,7 +3093,15 @@ fn localnet(
         let url = test_validator_rpc_url(&cfg.test_validator);
         let log_streams = stream_logs(cfg, &url);
 
-        std::io::stdin().lock().lines().next().unwrap().unwrap();
+        use std::io::{self, BufRead};
+
+        let input = io::stdin()
+            .lock()
+            .lines()
+            .next()
+            .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "No input found"))
+            .and_then(|result| result.map_err(|e| io::Error::new(io::ErrorKind::Other, e)))
+            .unwrap_or_else(|e| panic!("Error reading input: {}", e));
 
         // Check all errors and shut down.
         if let Err(err) = validator_handle.kill() {
